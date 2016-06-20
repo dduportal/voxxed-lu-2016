@@ -1,0 +1,74 @@
+version: '2'
+
+services:
+  gitserver:
+    image: gogs/gogs:latest
+    ports:
+      - "22:22"
+      - "3000:3000"
+    networks:
+      - forge
+    volumes:
+      - git-data:/data
+      - ./gogs/app.ini:/data/gogs/conf/app.ini
+
+  artefactserver:
+    image: jfrog-docker-reg2.bintray.io/jfrog/artifactory-oss:latest
+    ports:
+      - 18081:8081
+    volumes:
+      - artefacts-data:/var/opt/jfrog/artifactory
+    networks:
+      - forge
+
+  docker-registry:
+    image: registry:2
+    ports:
+      - 5000:5000
+    volumes:
+      - docker-reg-data:/var/lib/registry
+    networks:
+      - forge
+
+  jenkins1:
+    image: jenkins:1.651.3-alpine
+    ports:
+      - 8080:8080
+      - 50000:50000
+    volumes:
+      - jenkins1-data:/var/jenkins_home
+    networks:
+      - forge
+
+  jenkins2:
+    image: jenkins:2.3-alpine
+    environment:
+      - JENKINS_OPTS=--httpPort=8081
+      - JENKINS_SLAVE_AGENT_PORT=50001
+    ports:
+      - 8081:8081
+      - 50001:50001
+    volumes:
+      - jenkins2-data:/var/jenkins_home
+    networks:
+      - forge
+
+  config-container:
+    build: ./config-container/
+    volumes:
+      - ./:/current_data
+    networks:
+      - forge
+    depends_on:
+      - gitserver
+      # - artefactserver
+
+volumes:
+  git-data:
+  artefacts-data:
+  docker-reg-data:
+  jenkins1-data:
+  jenkins2-data:
+
+networks:
+  forge:
