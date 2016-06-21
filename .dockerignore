@@ -10,3 +10,4 @@ Jenkinsfile
 pom.xml
 *.md
 tmp
+host-m2-repo

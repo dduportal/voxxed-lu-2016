@@ -23,8 +23,12 @@ RUN curl -fSL "http://apache.belnet.be/maven/maven-3/${MVN_VERSION}/binaries/apa
 COPY entrypoint.sh /entrypoint.sh
 COPY slave-definition.xml /slave-definition.xml
 
-VOLUME /var/jenkins_data
-
 USER $JENKINS_USER
+COPY settings.xml /settings.xml
+RUN mkdir -p ${JENKINS_HOME}/.m2 \
+  && cp /settings.xml ${JENKINS_HOME}/.m2/ \
+  && ls -al ${JENKINS_HOME}/.m2
+
+#VOLUME /var/jenkins_data
 
 ENTRYPOINT ["/bin/sh","/entrypoint.sh"]

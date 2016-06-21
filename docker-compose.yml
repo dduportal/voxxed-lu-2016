@@ -67,15 +67,6 @@ services:
       - DOCKER_HOST=unix:///var/run/docker.sock
       - NODE_LABELS=docker
 
-  # artefactserver:
-  #   image: jfrog-docker-reg2.bintray.io/jfrog/artifactory-oss:latest
-  #   ports:
-  #     - 18081:8081
-  #   volumes:
-  #     - artefacts-data:/var/opt/jfrog/artifactory
-  #   networks:
-  #     - forge
-
   local-docker-registry:
     image: registry:2
     ports:
@@ -85,24 +76,29 @@ services:
     networks:
       - forge
 
-  # jenkins1:
-  #   image: jenkins:1.651.3-alpine
-  #   ports:
-  #     - 8080:8080
-  #     - 50000:50000
-  #   volumes:
-  #     - jenkins1-data:/var/jenkins_home
-  #   networks:
-  #     - forge
+  artefactserver:
+    image: jfrog-docker-reg2.bintray.io/jfrog/artifactory-oss:latest
+    ports:
+      - 8081:8081
+    volumes:
+      - ./host-m2-repo:/shared-m2-repository
+    networks:
+      - forge
 
-
-
-
-      # - artefactserver
+  artefactserver-config:
+    build: ./docker/artefactserver-config/
+    restart: on-failure:10
+    depends_on:
+      - artefactserver
+    networks:
+      - forge
+    environment:
+      - SHARED_M2_REPOSITORY=/shared-m2-repository
+      - ARTEFACT_SERVER_URL=http://artefactserver:8081
 
 volumes:
   git-data:
-  artefacts-data:
+  shared-m2:
   docker-reg-data:
   jenkins1-data:
   jenkins2-data:
