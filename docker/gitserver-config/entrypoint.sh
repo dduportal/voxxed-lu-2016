@@ -14,12 +14,26 @@ FIRST_USER=jenkins
 LOCAL_DATA_MOUNTPOINT=/current_data
 REPO_NAME=demoapp
 REPO_GIT_URL="git@${GITSERVER_ADDR}:${FIRST_USER}/${REPO_NAME}.git"
-SSH_KEY_PATTERN=/current_data/sshkeys/demo_insecure_key
+SSH_KEY_PATTERN=/root/.ssh/demo_insecure_key
 
 ### First we wait a bit to avoid race concurency
 sleep 2
 
 echo "== Configuring Git Server"
+
+# Copying the SSH Config to avoid annoyances
+mkdir -p /root/.ssh
+cp /current_data/sshkeys/* /root/.ssh/
+chmod -R 0600 /root/.ssh/*
+
+cat <<EOF >/root/.ssh/config
+Host ${GITSERVER_ADDR}
+    HostName ${GITSERVER_ADDR}
+    User git
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+    IdentityFile ${SSH_KEY_PATTERN}
+EOF
 
 # We create the first user
 curl -X POST \
@@ -42,17 +56,6 @@ curl -X POST \
   -F "key=$(cat ${SSH_KEY_PATTERN}.pub)" \
   -u "jenkins:jenkins" \
   ${GITSERVER_API_URL}/admin/users/${FIRST_USER}/keys
-
-# Copying the SSH Config to avoid annoyances
-mkdir -p /root/.ssh
-cat <<EOF >/root/.ssh/config
-Host ${GITSERVER_ADDR}
-    HostName ${GITSERVER_ADDR}
-    User git
-    StrictHostKeyChecking no
-    UserKnownHostsFile /dev/null
-    IdentityFile ${SSH_KEY_PATTERN}
-EOF
 
 # Load our local repository inside the newly created one
 git clone --bare ${LOCAL_DATA_MOUNTPOINT} /tmp/${REPO_NAME}

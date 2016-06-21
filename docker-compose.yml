@@ -32,7 +32,6 @@ services:
     volumes:
       - jenkins2-data:/var/jenkins_home
       - ./plugins:/usr/share/jenkins/ref/plugins/
-      - ./sshkeys/ssh-config:/var/jenkins_home/.ssh/config
       - ./sshkeys:/custom-ssh-keys
     networks:
       - forge
