@@ -2,7 +2,7 @@
 <slave>
   <name>NODE_NAME</name>
   <description></description>
-  <remoteFS>/var/jenkins_home</remoteFS>
+  <remoteFS>/var/jenkins_data</remoteFS>
   <numExecutors>2</numExecutors>
   <mode>NORMAL</mode>
   <retentionStrategy class="hudson.slaves.RetentionStrategy$Always"/>

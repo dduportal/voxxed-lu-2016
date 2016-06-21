@@ -4,6 +4,7 @@ node('maven3-jdk8') {
 
     sh 'git rev-parse --short HEAD > GIT_COMMIT'
     short_commit = readFile('GIT_COMMIT')
+    def pom = readMavenPom file:'pom.xml'
     sh 'rm GIT_COMMIT'
 
     stage 'Build'
@@ -17,14 +18,13 @@ node('maven3-jdk8') {
     sh 'mvn verify'
     step([$class: 'JUnitResultArchiver', testResults: 'target/failsafe-reports/*.xml'])
 
+    def artefactName = "${pom.getArtifactId()}-${pom.getVersion()}.${pom.getPackaging()}"
     dir('target') {
-        archive "${pom.getArtifactId()}.${pom.getPackaging()}"
+        archive "${artefactName}"
     }
 
-    stash name: 'binary', includes: "target/${pom.getArtifactId()}.${pom.getPackaging()}"
-    // dir('src/main/docker') {
-    //     stash name: 'dockerfile', includes: 'Dockerfile'
-    // }
+    stash name: 'binary', includes: "target/${artefactName}"
+
 }
 
 // node('docker') {
