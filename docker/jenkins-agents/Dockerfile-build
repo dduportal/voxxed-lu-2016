@@ -1,0 +1,30 @@
+FROM java:openjdk-8-jdk-alpine
+MAINTAINER Damien DUPORTAL
+
+ENV JAVA_HOME=/usr/lib/jvm/default-jvm \
+  JENKINS_USER=jenkins \
+  JENKINS_GROUP=jenkins \
+  JENKINS_HOME=/var/jenkins_data
+
+RUN apk --no-cache --update add git curl bash \
+  && addgroup ${JENKINS_GROUP} \
+  && adduser -D -s /bin/bash -G ${JENKINS_GROUP} -u 1000 ${JENKINS_USER} -h ${JENKINS_HOME} \
+  && passwd -u jenkins \
+  && chown -R jenkins:jenkins ${JENKINS_HOME} \
+  && echo "jenkins:jenkins" | chpasswd
+
+ENV MVN_VERSION=3.3.9 \
+  PATH=/opt/apache-maven-3.3.9/bin:${PATH}
+RUN curl -fSL "http://apache.belnet.be/maven/maven-3/${MVN_VERSION}/binaries/apache-maven-${MVN_VERSION}-bin.tar.gz" -o /tmp/maven.tgz \
+  && mkdir -p /opt \
+  && tar xzf /tmp/maven.tgz -C /opt \
+  && rm -rf /tmp/maven.tgz
+
+COPY entrypoint.sh /entrypoint.sh
+COPY slave-definition.xml /slave-definition.xml
+
+VOLUME /var/jenkins_data
+
+USER $JENKINS_USER
+
+ENTRYPOINT ["/bin/sh","/entrypoint.sh"]

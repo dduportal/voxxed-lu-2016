@@ -1,0 +1,33 @@
+FROM java:openjdk-8-jdk-alpine
+MAINTAINER Damien DUPORTAL
+
+ENV JAVA_HOME=/usr/lib/jvm/default-jvm \
+  JENKINS_USER=jenkins \
+  JENKINS_GROUP=jenkins \
+  JENKINS_HOME=/var/jenkins_data
+
+RUN apk --no-cache --update add git curl bash \
+  && addgroup ${JENKINS_GROUP} \
+  && adduser -D -s /bin/bash -G ${JENKINS_GROUP} -u 1000 ${JENKINS_USER} -h ${JENKINS_HOME} \
+  && passwd -u jenkins \
+  && chown -R jenkins:jenkins ${JENKINS_HOME} \
+  && echo "jenkins:jenkins" | chpasswd
+
+ENV DOCKER_VERSION=1.11.2 \
+  DOCKER_SHA256=8c2e0c35e3cda11706f54b2d46c2521a6e9026a7b13c7d4b8ae1f3a706fc55e1
+RUN addgroup docker \
+  && addgroup jenkins docker \
+  && curl -fSL "https://get.docker.com/builds/Linux/x86_64/docker-${DOCKER_VERSION}.tgz" -o /tmp/docker.tgz \
+  && echo "${DOCKER_SHA256}  /tmp/docker.tgz" | sha256sum -c - \
+  && tar xzf /tmp/docker.tgz -C /usr/bin/ \
+  && chmod +x /usr/bin/docker* \
+  && rm -rf /tmp/docker*
+
+COPY entrypoint.sh /entrypoint.sh
+COPY slave-definition.xml /slave-definition.xml
+
+VOLUME /var/jenkins_data
+
+USER $JENKINS_USER
+
+ENTRYPOINT ["/bin/sh","/entrypoint.sh"]

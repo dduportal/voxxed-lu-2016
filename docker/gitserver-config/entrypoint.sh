@@ -14,7 +14,7 @@ FIRST_USER=jenkins
 LOCAL_DATA_MOUNTPOINT=/current_data
 REPO_NAME=demoapp
 REPO_GIT_URL="git@${GITSERVER_ADDR}:${FIRST_USER}/${REPO_NAME}.git"
-SSH_KEY_PATTERN=/root/.ssh/demo_insecure_key
+SSH_KEY_PATTERN=/current_data/sshkeys/demo_insecure_key
 
 ### First we wait a bit to avoid race concurency
 sleep 2
@@ -44,6 +44,7 @@ curl -X POST \
   ${GITSERVER_API_URL}/admin/users/${FIRST_USER}/keys
 
 # Copying the SSH Config to avoid annoyances
+mkdir -p /root/.ssh
 cat <<EOF >/root/.ssh/config
 Host ${GITSERVER_ADDR}
     HostName ${GITSERVER_ADDR}

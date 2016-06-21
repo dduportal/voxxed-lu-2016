@@ -1,4 +1,4 @@
-node {
+node('maven3-jdk8') {
     stage 'Checkout'
     checkout scm
 
@@ -7,20 +7,14 @@ node {
     sh 'rm GIT_COMMIT'
 
     stage 'Build'
-    withMaven {
-        sh 'mvn clean compile'
-    }
+    sh 'mvn clean compile'
 
     stage 'Unit Tests'
-    withMaven {
-        sh 'mvn test'
-    }
+    sh 'mvn test'
     step([$class: 'JUnitResultArchiver', testResults: 'target/surefire-reports/*.xml'])
 
     stage 'Integration Tests'
-    withMaven {
-        sh 'mvn verify'
-    }
+    sh 'mvn verify'
     step([$class: 'JUnitResultArchiver', testResults: 'target/failsafe-reports/*.xml'])
 
     dir('target') {
@@ -62,11 +56,11 @@ node {
 // }
 
 // Custom step
-def withMaven(def body) {
-    // def javaHome = tool name: 'oracle-8u77', type: 'hudson.model.JDK'
-    def mavenHome = tool name: 'maven-3.3.9', type: 'hudson.tasks.Maven$MavenInstallation'
-
-    withEnv(["PATH+MAVEN=${mavenHome}/bin"]) {
-        body.call()
-    }
-}
+// def withMaven(def body) {
+//     // def javaHome = tool name: 'oracle-8u77', type: 'hudson.model.JDK'
+//     def mavenHome = tool name: 'maven-3.3.9', type: 'hudson.tasks.Maven$MavenInstallation'
+//
+//     withEnv(["PATH+MAVEN=${mavenHome}/bin"]) {
+//         body.call()
+//     }
+// }

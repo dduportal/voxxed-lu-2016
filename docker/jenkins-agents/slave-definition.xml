@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<slave>
+  <name>NODE_NAME</name>
+  <description></description>
+  <remoteFS>/var/jenkins_home</remoteFS>
+  <numExecutors>2</numExecutors>
+  <mode>NORMAL</mode>
+  <retentionStrategy class="hudson.slaves.RetentionStrategy$Always"/>
+  <launcher class="hudson.slaves.JNLPLauncher"/>
+  <label>NODE_LABELS</label>
+  <nodeProperties/>
+</slave>
