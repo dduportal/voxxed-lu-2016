@@ -59,6 +59,8 @@ services:
     restart: unless-stopped
     depends_on:
       - jenkins2
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - JENKINS_URL=http://jenkins2:8080
       - NODE_NAME=docker-agent
