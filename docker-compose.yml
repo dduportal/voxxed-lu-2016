@@ -67,14 +67,6 @@ services:
       - DOCKER_HOST=unix:///var/run/docker.sock
       - NODE_LABELS=docker
 
-  # jenkins-config:
-  #   build: ./docker/jenkins-config/
-  #   networks:
-  #     - forge
-  #   depends_on:
-  #     - jenkins2
-  #     - build-agent
-  #     - docker-agent
   # artefactserver:
   #   image: jfrog-docker-reg2.bintray.io/jfrog/artifactory-oss:latest
   #   ports:
@@ -84,14 +76,14 @@ services:
   #   networks:
   #     - forge
 
-  # docker-registry:
-  #   image: registry:2
-  #   ports:
-  #     - 5000:5000
-  #   volumes:
-  #     - docker-reg-data:/var/lib/registry
-  #   networks:
-  #     - forge
+  local-docker-registry:
+    image: registry:2
+    ports:
+      - 5000:5000
+    volumes:
+      - docker-reg-data:/var/lib/registry
+    networks:
+      - forge
 
   # jenkins1:
   #   image: jenkins:1.651.3-alpine
