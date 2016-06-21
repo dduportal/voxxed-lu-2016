@@ -1,0 +1,12 @@
+.git
+.gitignore
+.idea
+src
+docker
+plugins
+sshkeys
+docker-compose.yml
+Jenkinsfile
+pom.xml
+*.md
+tmp

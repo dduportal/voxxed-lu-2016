@@ -1,5 +1,5 @@
 FROM java:openjdk-8-jdk-alpine
-MAINTAINER Damien DUPORTAL
+MAINTAINER Damien DUPORTAL <dduportal@cloudbees.com>
 
 ENV JAVA_HOME=/usr/lib/jvm/default-jvm \
   JENKINS_USER=jenkins \

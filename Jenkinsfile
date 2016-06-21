@@ -18,49 +18,42 @@ node('maven3-jdk8') {
     sh 'mvn verify'
     step([$class: 'JUnitResultArchiver', testResults: 'target/failsafe-reports/*.xml'])
 
-    def artefactName = "${pom.getArtifactId()}-${pom.getVersion()}.${pom.getPackaging()}"
+    def artefactName = "${pom.getArtifactId()}.${pom.getPackaging()}"
     dir('target') {
         archive "${artefactName}"
     }
 
     stash name: 'binary', includes: "target/${artefactName}"
+    stash name: 'config', includes: "hello-world.yml"
+    stash name: 'dockerfile', includes: "Dockerfile"
 
 }
 
-// node('docker') {
-//     unstash 'dockerfile'
-//     unstash 'binary'
-//
-//     stage 'Building Docker Img'
-//     image = docker.build("alecharp/simpleapp:${short_commit}")
-//
-//     container = image.run('-P')
-//     sh "docker port ${container.id} 8080 > DOCKER_IP"
-//     ip = readFile('DOCKER_IP').trim()
-//     sh 'rm DOCKER_IP'
-// }
+node('docker') {
+    unstash 'dockerfile'
+    unstash 'config'
+    unstash 'binary'
 
-// stage 'Container validation'
-// try {
-//     input message: "http://${ip}. Is it ok?", ok: 'Publish it'
-// } finally {
-//     node('docker') { container.stop() }
-// }
-//
-// node('docker') {
-//     stage 'Publishing Docker Img'
-//     // requirement: local docker registry available on port 5000
-//     docker.withRegistry('http://localhost:5000', '') {
-//         image.push('latest')
-//     }
-// }
+    stage 'Building Docker Img'
+    dir('.') {
+      image = docker.build("voxxed2016lu/demoapp:${short_commit}")
+    }
 
-// Custom step
-// def withMaven(def body) {
-//     // def javaHome = tool name: 'oracle-8u77', type: 'hudson.model.JDK'
-//     def mavenHome = tool name: 'maven-3.3.9', type: 'hudson.tasks.Maven$MavenInstallation'
-//
-//     withEnv(["PATH+MAVEN=${mavenHome}/bin"]) {
-//         body.call()
-//     }
-// }
+    stage 'Launching Docker image for manual validation'
+    container = image.run('-P')
+    sh "docker port ${container.id} 8080 | cut -d':' -f2 > EXPOSED_PORT"
+    exposed_port = readFile('EXPOSED_PORT').trim()
+    sh 'rm EXPOSED_PORT'
+}
+
+try {
+    input message: "http://localhost:${exposed_port}. Is it ok?", ok: 'Publish it'
+} finally {
+    node('docker') { container.stop() }
+}
+
+    //     stage 'Publishing Docker Img'
+    //     // requirement: local docker registry available on port 5000
+    //     docker.withRegistry('http://localhost:5000', '') {
+    //         image.push('latest')
+    //     }
