@@ -3,6 +3,7 @@ package com.dduportal.voxxed2016lu.demoapp;
 import com.dduportal.voxxed2016lu.demoapp.health.TemplateHealthCheck;
 import com.dduportal.voxxed2016lu.demoapp.resources.HelloWorldResource;
 import io.dropwizard.Application;
+import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
@@ -19,6 +20,7 @@ public class HelloWorldApplication extends Application<HelloWorldConfiguration> 
     @Override
     public void initialize(Bootstrap<HelloWorldConfiguration> bootstrap) {
         // nothing to do yet
+        bootstrap.addBundle(new AssetsBundle("/assets", "/","index.html"));
     }
 
     @Override
@@ -32,6 +34,7 @@ public class HelloWorldApplication extends Application<HelloWorldConfiguration> 
                 new TemplateHealthCheck(configuration.getTemplate());
         environment.healthChecks().register("template", healthCheck);
         environment.jersey().register(resource);
+        environment.jersey().setUrlPattern("/api/*");
     }
 
 }

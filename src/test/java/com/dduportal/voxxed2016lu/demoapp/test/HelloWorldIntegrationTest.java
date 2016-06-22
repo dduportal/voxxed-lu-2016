@@ -29,7 +29,7 @@ public class HelloWorldIntegrationTest {
         Thread.sleep(30000);
 
         Saying result = client.target(
-                String.format("http://localhost:%d/hello-world", RULE.getLocalPort())
+                String.format("http://localhost:%d/api/hello-world", RULE.getLocalPort())
         ).queryParam("name", "dropwizard").request().get(Saying.class);
 
         assertThat(result.getContent()).isEqualTo("Hello, dropwizard!");
