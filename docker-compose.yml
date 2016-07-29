@@ -21,7 +21,7 @@ services:
       - gitserver
 
   jenkins2:
-    image: jenkins:2.3-alpine
+    image: jenkins:2.7.1
     environment:
       - JENKINS_OPTS=--httpPort=8080
       - JENKINS_SLAVE_AGENT_PORT=50000
@@ -35,66 +35,66 @@ services:
       - ./sshkeys:/custom-ssh-keys
     networks:
       - forge
-
-  build-agent:
-    build:
-      context: ./docker/jenkins-agents/
-      dockerfile: Dockerfile-build
-    networks:
-      - forge
-    restart: unless-stopped
-    depends_on:
-      - jenkins2
-    environment:
-      - JENKINS_URL=http://jenkins2:8080
-      - NODE_NAME=build-agent
-      - NODE_LABELS=maven3 jdk8 maven3-jdk8
-
-  docker-agent:
-    build:
-      context: ./docker/jenkins-agents/
-      dockerfile: Dockerfile-docker
-    networks:
-      - forge
-    restart: unless-stopped
-    depends_on:
-      - jenkins2
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      - JENKINS_URL=http://jenkins2:8080
-      - NODE_NAME=docker-agent
-      - DOCKER_HOST=unix:///var/run/docker.sock
-      - NODE_LABELS=docker
-
-  local-docker-registry:
-    image: registry:2
-    ports:
-      - 5000:5000
-    volumes:
-      - docker-reg-data:/var/lib/registry
-    networks:
-      - forge
-
-  artefactserver:
-    image: jfrog-docker-reg2.bintray.io/jfrog/artifactory-oss:latest
-    ports:
-      - 8081:8081
-    volumes:
-      - ./host-m2-repo:/shared-m2-repository
-    networks:
-      - forge
-
-  artefactserver-config:
-    build: ./docker/artefactserver-config/
-    restart: on-failure:10
-    depends_on:
-      - artefactserver
-    networks:
-      - forge
-    environment:
-      - SHARED_M2_REPOSITORY=/shared-m2-repository
-      - ARTEFACT_SERVER_URL=http://artefactserver:8081
+  # 
+  # build-agent:
+  #   build:
+  #     context: ./docker/jenkins-agents/
+  #     dockerfile: Dockerfile-build
+  #   networks:
+  #     - forge
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - jenkins2
+  #   environment:
+  #     - JENKINS_URL=http://jenkins2:8080
+  #     - NODE_NAME=build-agent
+  #     - NODE_LABELS=maven3 jdk8 maven3-jdk8
+  #
+  # docker-agent:
+  #   build:
+  #     context: ./docker/jenkins-agents/
+  #     dockerfile: Dockerfile-docker
+  #   networks:
+  #     - forge
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - jenkins2
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   environment:
+  #     - JENKINS_URL=http://jenkins2:8080
+  #     - NODE_NAME=docker-agent
+  #     - DOCKER_HOST=unix:///var/run/docker.sock
+  #     - NODE_LABELS=docker
+  #
+  # local-docker-registry:
+  #   image: registry:2
+  #   ports:
+  #     - 5000:5000
+  #   volumes:
+  #     - docker-reg-data:/var/lib/registry
+  #   networks:
+  #     - forge
+  #
+  # artefactserver:
+  #   image: jfrog-docker-reg2.bintray.io/jfrog/artifactory-oss:latest
+  #   ports:
+  #     - 8081:8081
+  #   volumes:
+  #     - ./host-m2-repo:/shared-m2-repository
+  #   networks:
+  #     - forge
+  #
+  # artefactserver-config:
+  #   build: ./docker/artefactserver-config/
+  #   restart: on-failure:10
+  #   depends_on:
+  #     - artefactserver
+  #   networks:
+  #     - forge
+  #   environment:
+  #     - SHARED_M2_REPOSITORY=/shared-m2-repository
+  #     - ARTEFACT_SERVER_URL=http://artefactserver:8081
 
 volumes:
   git-data:
